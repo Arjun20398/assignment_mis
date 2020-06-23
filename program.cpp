@@ -1,4 +1,8 @@
-
+/*
+cost = 106966.05, closelimit = 3
+cost = 92866.56, closelimit = 4
+cost = 88859.70, closelimit = 5
+*/
 #include<bits/stdc++.h>
 using namespace std;
 #define ll long long
@@ -18,7 +22,7 @@ struct Path{
     vector<int> path;
     Path():cost(0),perEmpCost(100000000),path({}){}
 };
-double arr[N][M],fixedPrice=300,perKM=50,startKM=fixedPrice/perKM,limit=3,sum=0;
+double arr[N][M],fixedPrice=300,perKM=50,startKM=fixedPrice/perKM,limit=3,sum=0,closelimit=6;
 vector<pair<double,int>> closest[N];
 vector<vector<int>> ans;
 
@@ -34,15 +38,15 @@ double authenticate(vector<int> &path){
 }
 void findClose(int emp,int limit,vector<int>& emps){
     int ind=0;
-    while(ind<closest[emp].size() && emps.size()<limit){
+    while(ind<closest[emp].size() && emps.size()<closelimit){
         if(vis[closest[emp][ind].second]==0){
             emps.push_back(closest[emp][ind].second);
         }
         ind++;
     }
 }
-void calculate(int last,int mask,int size,vector<int> &emp,Path& tempans,double cost,vector<int> path){
-    if(mask == (1<<size -1))
+void calculate(int last,int mask,int masksize,int size,vector<int> &emp,Path& tempans,double cost,vector<int> path){
+    if(masksize == limit)
         return ;
     for(int ind=0;ind<size;ind++)
         if((mask & 1<<ind) == 0){
@@ -54,7 +58,7 @@ void calculate(int last,int mask,int size,vector<int> &emp,Path& tempans,double 
                 tempans.perEmpCost = cost/path.size();
                 tempans.path = path;
             }
-            calculate(emp[ind],mask,size,emp,tempans,cost,path);
+            calculate(emp[ind],mask,masksize+1,size,emp,tempans,cost,path);
             mask-=(1<<ind);
             cost-=perKM*arr[last][emp[ind]];
             path.pop_back();
@@ -63,7 +67,7 @@ void calculate(int last,int mask,int size,vector<int> &emp,Path& tempans,double 
 void findpath(vector<int>& emp){
     int size=emp.size(),mask=0;
     Path tempPath = Path();
-    calculate(0,mask,size,emp,tempPath,300,vector<int>());
+    calculate(0,mask,0,size,emp,tempPath,300,vector<int>());
     sum+=tempPath.cost;
     cout<<tempPath.cost<<" : ";
     //cout<<authenticate(tempPath.path)<<"-> : ";
