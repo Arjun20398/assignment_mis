@@ -2,14 +2,16 @@
 cost = 106966.05, closelimit = 3
 cost = 92866.56, closelimit = 4
 cost = 88859.70, closelimit = 5
-cost = 85690.97, closelimit = 6
+cost = 85690.97, closelimit = 6 ,46 ms
+cost = 78784.88, closelimit = 12 , 114 ms
+cost = 73207.97, closelimit = 20 , 219.42 ms
 */
 #include<bits/stdc++.h>
 using namespace std;
 #define ll long long
 #define mem(a) memset(a,0,sizeof(a))
 #define N 257
-#define M 257
+#define M N
 #define MAXCOST 1000000000
 struct Path{
     double cost,perEmpCost;
@@ -17,7 +19,7 @@ struct Path{
     Path():cost(0),perEmpCost(MAXCOST),path({}){}
 };
 
-double arr[N][M],fixedPrice=300,perKM=50,startKM=fixedPrice/perKM,limit=3,sum=0,closelimit=6;
+double arr[N][M],fixedPrice=300,perKM=50,startKM=fixedPrice/perKM,limit=3,sum=0,closelimit=20;
 vector<pair<double,int>> closest[N];
 vector<vector<int>> ans;
 int vis[N],counter[N];
@@ -40,6 +42,7 @@ void findClose(int emp,int limit,vector<int>& emps){
         }
         ind++;
     }
+
 }
 
 void calculate(int last,int mask,int masksize,int size,vector<int> &emp,Path& tempans,double cost,vector<int> path){
@@ -50,7 +53,7 @@ void calculate(int last,int mask,int masksize,int size,vector<int> &emp,Path& te
             mask|=(1<<ind);
             cost+=perKM*arr[last][emp[ind]];
             path.push_back(emp[ind]);
-            if((mask & 1) && tempans.perEmpCost>cost/path.size()){
+            if(tempans.perEmpCost>cost/path.size()){
                 tempans.cost = cost;
                 tempans.perEmpCost = cost/path.size();
                 tempans.path = path;
@@ -67,10 +70,10 @@ void findpath(vector<int>& emp){
     Path tempPath = Path();
     calculate(0,mask,0,size,emp,tempPath,fixedPrice,vector<int>());
     sum+=tempPath.cost;
-    cout<<tempPath.cost<<" : ";
+    cout<<"charge of the path : "<<tempPath.cost<<", Path : 0";
     //cout<<authenticate(tempPath.path)<<"-> : ";
     for(int num:tempPath.path)
-        vis[num]=1,cout<<num<<" ";
+        vis[num]=1,cout<<"-> "<<num;
     cout<<"\n";
 }
 
@@ -93,8 +96,9 @@ int main()
 {
     ios_base::sync_with_stdio(0);
     cin.tie(NULL);
-
-    cout<<fixed<<setprecision(2);
+    clock_t start,end;
+    start=clock();
+    cout<<fixed<<setprecision(4);
     for(int i=0;i<N;i++)
         for(int j=0;j<M;j++){
             cin>>arr[i][j];
@@ -104,13 +108,17 @@ int main()
         }
     mem(vis);
     mem(counter);
-    for(int i=1;i<N;i++)
+    for(int i=1;i<N;)
         if(vis[i]==0){
-        vector<int> emps(1,i);
-        findClose(i,limit,emps);
-        findpath(emps);      
-    } 
+            vector<int> emps(1,i);
+            findClose(i,limit,emps);
+            findpath(emps);      
+        } else {
+            i++;
+        } 
     cout<<"final cost  : "<<sum<<"\n";
     cout<<"All employees considered : "<<allConsidered()<<"\n";
+    end=clock();
+    cout<<"time taken : "<<(double)(end-start)/1000<<" ms\n";
     return 0;
 }
